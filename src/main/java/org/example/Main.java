@@ -7,53 +7,61 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         Random random = new Random();
-        String[] options = {"rock", "paper", "scissors"};
+        String[] options = {"rock",
+                            "paper",
+                            "scissors",
+                            "lizard",
+                            "spock"};
 
-        int userScore = 0;
-        int computerScore = 0;
-        int ties = 0;
-        int rounds = 0;
+        int playerHP = 100;
+        int computerHP = 100;
 
-        System.out.println("Welcome to Rock, Paper, Scissors!");
+        System.out.println("Welcome to RPSLS Battle!");
 
-        while (true) {
-            System.out.print("\nEnter your move (rock, paper, or scissors): ");
-            String userMove = scanner.nextLine().toLowerCase().trim();
+        System.out.println("===========================");
+        System.out.println("        BATTLE TIME!");
+        System.out.println("===========================");
 
-            while (!userMove.equals("rock") && !userMove.equals("paper") && !userMove.equals("scissors")) {
-                System.out.print("Invalid move! Please enter rock, paper, or scissors!");
-                userMove = scanner.nextLine().toLowerCase().trim();
-            }
+        // -------------------------
+        // CHOOSE FIGHTER
+        // -------------------------
 
-            int compIndex = random.nextInt(3);
-            String computerMove = options[compIndex];
+        System.out.println("\nChoose your fighter!");
+        System.out.println("1. Rock");
+        System.out.println("2. Paper");
+        System.out.println("3. Scissors");
+        System.out.println("4. Lizard");
+        System.out.println("5. Spock");
 
-            System.out.println("Computer chose: " + computerMove);
+        System.out.print("Enter your choice: ");
 
-            if (userMove.equals(computerMove)) {
-                System.out.println("It's a tie!");
-                ties++;
-            } else if (
-                    (userMove.equals("rock") && computerMove.equals("scissors")) ||
-                            (userMove.equals("scissors") && computerMove.equals("paper")) ||
-                            (userMove.equals("paper") && computerMove.equals("rock"))
-            ) {
-                System.out.println("You win!");
-                userScore++;
-            } else {
-                System.out.println("You lose!");
-                computerScore++;
-            }
-            rounds++;
+        int choice = scanner.nextInt();
+        scanner.nextLine();
 
-            System.out.print("Play again? (yes/no): ");
-            String playAgain = scanner.nextLine().toLowerCase().trim();
+        while (choice < 1 || choice > 5) {
+            System.out.print(
+                    "Invalid choice. Choose 1, 2, 3, 4, or 5: "
+            );
 
-            if (!playAgain.equals("yes")) {
-                break;
-            }
+            choice = scanner.nextInt();
+            scanner.nextLine();
         }
-        System.out.println("Thanks for playing! Final Score -> You: " + userScore);
-        scanner.close();
+
+        String playerFighter = options[choice - 1];
+
+        // Computer randomly chooses a fighter
+        int computerChoice = random.nextInt(5);
+        String computerFighter = options[computerChoice];
+
+        System.out.println("\nYou chose " + playerFighter + "!");
+        System.out.println(
+                "Your opponent chose " + computerFighter + "!"
+        );
+
+        System.out.println("\nBattle Start!");
+
+
+        // System.out.println("Thanks for playing! Final Score -> You: " + userScore);
+        //scanner.close();
     }
 }
