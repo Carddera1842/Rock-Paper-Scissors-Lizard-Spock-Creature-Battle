@@ -2,6 +2,9 @@ package org.example;
 
 import org.example.model.Creature;
 import org.example.repository.CreatureRepository;
+import org.example.model.Move;
+import org.example.repository.MoveRepository;
+import org.example.repository.TypeAdvantageRepository;
 
 import java.util.List;
 import java.util.Random;
@@ -12,11 +15,31 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         Random random = new Random();
 
-        CreatureRepository repository =
-                new CreatureRepository();
+        // --------------------------------
+        // REPOSITORIES
+        // --------------------------------
 
-        List<Creature> creatures =
-                repository.findAll();
+        CreatureRepository repository = new CreatureRepository();
+
+        MoveRepository moveRepository = new MoveRepository();
+
+        TypeAdvantageRepository typeAdvantageRepository = new TypeAdvantageRepository();
+
+        // --------------------------------
+        // LOAD CREATURES FROM DATABASE
+        // --------------------------------
+
+        List<Creature> creatures = repository.findAll();
+
+        if (creatures.isEmpty()) {
+            System.out.println("No creatures were found");
+            scanner.close();
+            return;
+        }
+
+        // --------------------------------
+        // GAME INTRO
+        // --------------------------------
 
         System.out.println("Welcome to RPSLS Battle!");
 
@@ -34,12 +57,7 @@ public class Main {
 
             Creature creature = creatures.get(i);
 
-            System.out.println(
-                    (i + 1) + ". " +
-                            creature.getName() +
-                            " [" + creature.getType() + "]" +
-                            " HP: " + creature.getBaseHp()
-            );
+            System.out.println((i + 1) + ". " + creature.getName() + " [" + creature.getType() + "]" + " HP: " + creature.getBaseHp());
         }
 
         System.out.print("\nEnter your choice: ");
@@ -49,56 +67,77 @@ public class Main {
 
         while (choice < 1 || choice > creatures.size()) {
 
-            System.out.print(
-                    "Invalid choice. Choose 1-" +
-                            creatures.size() + ": "
-            );
+            System.out.print("Invalid choice. Choose 1-" + creatures.size() + ": ");
 
             choice = scanner.nextInt();
             scanner.nextLine();
         }
 
-        Creature playerCreature =
-                creatures.get(choice - 1);
+        // --------------------------------
+        // SELECT CREATURES
+        // --------------------------------
 
-        Creature computerCreature =
-                creatures.get(random.nextInt(creatures.size()));
+        Creature playerCreature = creatures.get(choice - 1);
+
+        Creature computerCreature = creatures.get(random.nextInt(creatures.size()));
+
+        // --------------------------------
+        // LOAD MOVES FROM DATABASE
+        // --------------------------------
+
+        List<Move> playerMoves = moveRepository.findMovesByCreatureId(playerCreature.getId());
+
+        List<Move> computerMoves = moveRepository.findMovesByCreatureId(computerCreature.getId());
+
+        if (playerMoves.isEmpty()) {
+            System.out.println("Your " + playerCreature.getName() + " has no moves!");
+            scanner.close();
+            return;
+        }
+        if (computerMoves.isEmpty()) {
+            System.out.println("Opponent " + computerCreature.getName() + " has no moves!");
+            scanner.close();
+            return;
+        }
+
+        // --------------------------------
+        // BATTLE STATS
+        // --------------------------------
 
         int playerHP = playerCreature.getBaseHp();
         int computerHP = computerCreature.getBaseHp();
+        int playerAttackStat = playerCreature.getAttack();
+        int playerDefenseStat = playerCreature.getDefense();
+        int computerAttackStat = computerCreature.getAttack();
+        int computerDefenseStat = computerCreature.getDefense();
 
-        System.out.println(
-                "\nYou chose " + playerCreature.getName() + "!"
-        );
 
-        System.out.println(
-                "Type: " + playerCreature.getType()
-        );
+        // --------------------------------
+        // INTRODUCE FIGHTERS
+        // --------------------------------
 
-        System.out.println(
-                "\nYour opponent chose " +
-                        computerCreature.getName() + "!"
-        );
+        System.out.println("\nYou chose " + playerCreature.getName() + "!");
 
-        System.out.println(
-                "Type: " + computerCreature.getType()
-        );
+        System.out.println("Type: " + playerCreature.getType());
+
+        System.out.println("\nYour opponent chose " + computerCreature.getName() + "!");
+
+        System.out.println("Type: " + computerCreature.getType());
 
         System.out.println("\nBattle Start!");
 
         // -------------------------
         // BATTLE LOOP
         // -------------------------
-/*
+
         while (playerHP > 0 && computerHP > 0) {
 
             System.out.println("\n----------------------------");
-            System.out.println(playerFighter + " HP: " + playerHP);
-            System.out.println(computerFighter + " HP: " + computerHP);
-            System.out.println("----------------------------");
 
-            String playerAttack = "";
-            int playerDamage = 0;
+            System.out.println(playerCreature.getName() + " HP: " + playerHP + "/" + playerCreature.getBaseHp());
+            System.out.println(computerCreature.getName() + " HP: " + computerHP + "/" + computerCreature.getBaseHp());
+
+            System.out.println("----------------------------");
 
             // -------------------------
             // PLAYER ATTACK MENU
@@ -106,288 +145,316 @@ public class Main {
 
             System.out.println("\nChoose your attack:");
 
-            if (playerFighter.equals("rock")) {
-                System.out.println("1. Pebble Toss");
-                System.out.println("2. Rock Smash");
-                System.out.println("3. Boulder Crush");
+            for (int i = 0; i < playerMoves.size(); i++) {
 
-            } else if (playerFighter.equals("paper")) {
-                System.out.println("1. Paper Cut");
-                System.out.println("2. Paper Plane");
-                System.out.println("3. Origami Strike");
+                Move move = playerMoves.get(i);
 
-            } else if (playerFighter.equals("scissors")) {
-                System.out.println("1. Snip");
-                System.out.println("2. Double Cut");
-                System.out.println("3. Blade Rush");
-
-            } else if (playerFighter.equals("lizard")) {
-                System.out.println("1. Bite");
-                System.out.println("2. Tail Swipe");
-                System.out.println("3. Poison Spit");
-
-            } else if (playerFighter.equals("spock")) {
-                System.out.println("1. Vulcan Chop");
-                System.out.println("2. Logic Blast");
-                System.out.println("3. Mind Meld");
+                System.out.println((i + 1) + ". " + move.getName() + " | Damage: " + move.getDamage() + " | Accuracy: " + move.getAccuracy() + "%");
             }
 
-            System.out.print("Attack: ");
+            System.out.print("Move: ");
 
             int attackChoice = scanner.nextInt();
             scanner.nextLine();
 
-            while (attackChoice < 1 || attackChoice > 3) {
-                System.out.print(
-                        "Invalid attack. Choose 1, 2, or 3: "
-                );
+            while (attackChoice < 1 || attackChoice > playerMoves.size()) {
+                System.out.print("Invalid move. Choose 1-" + playerMoves.size() + ": ");
 
                 attackChoice = scanner.nextInt();
                 scanner.nextLine();
             }
 
-            // -------------------------
-            // PLAYER ATTACK
-            // -------------------------
+            // --------------------------------
+            // CHOOSE MOVES
+            // --------------------------------
 
-            if (playerFighter.equals("rock")) {
+            Move playerMove = playerMoves.get(attackChoice - 1);
 
-                if (attackChoice == 1) {
-                    playerAttack = "Pebble Toss";
-                    playerDamage = 10;
-                } else if (attackChoice == 2) {
-                    playerAttack = "Rock Smash";
-                    playerDamage = 20;
-                } else {
-                    playerAttack = "Boulder Crush";
-                    playerDamage = 30;
-                }
+            Move computerMove = computerMoves.get(random.nextInt(computerMoves.size()));
 
-            } else if (playerFighter.equals("paper")) {
 
-                if (attackChoice == 1) {
-                    playerAttack = "Paper Cut";
-                    playerDamage = 10;
-                } else if (attackChoice == 2) {
-                    playerAttack = "Paper Plane";
-                    playerDamage = 20;
-                } else {
-                    playerAttack = "Origami Strike";
-                    playerDamage = 30;
-                }
-
-            } else if (playerFighter.equals("scissors")) {
-
-                if (attackChoice == 1) {
-                    playerAttack = "Snip";
-                    playerDamage = 10;
-                } else if (attackChoice == 2) {
-                    playerAttack = "Double Cut";
-                    playerDamage = 20;
-                } else {
-                    playerAttack = "Blade Rush";
-                    playerDamage = 30;
-                }
-
-            } else if (playerFighter.equals("lizard")) {
-
-                if (attackChoice == 1) {
-                    playerAttack = "Bite";
-                    playerDamage = 10;
-                } else if (attackChoice == 2) {
-                    playerAttack = "Tail Swipe";
-                    playerDamage = 20;
-                } else {
-                    playerAttack = "Poison Spit";
-                    playerDamage = 30;
-                }
-
-            } else if (playerFighter.equals("spock")) {
-
-                if (attackChoice == 1) {
-                    playerAttack = "Vulcan Chop";
-                    playerDamage = 10;
-                } else if (attackChoice == 2) {
-                    playerAttack = "Logic Blast";
-                    playerDamage = 20;
-                } else {
-                    playerAttack = "Mind Meld";
-                    playerDamage = 30;
-                }
-            }
-
-            // -------------------------
-            // COMPUTER ATTACK
-            // -------------------------
-
-            int computerAttackChoice = random.nextInt(3) + 1;
-
-            String computerAttack = "";
-            int computerDamage = 0;
-
-            if (computerFighter.equals("rock")) {
-
-                if (computerAttackChoice == 1) {
-                    computerAttack = "Pebble Toss";
-                    computerDamage = 10;
-                } else if (computerAttackChoice == 2) {
-                    computerAttack = "Rock Smash";
-                    computerDamage = 20;
-                } else {
-                    computerAttack = "Boulder Crush";
-                    computerDamage = 30;
-                }
-
-            } else if (computerFighter.equals("paper")) {
-
-                if (computerAttackChoice == 1) {
-                    computerAttack = "Paper Cut";
-                    computerDamage = 10;
-                } else if (computerAttackChoice == 2) {
-                    computerAttack = "Paper Plane";
-                    computerDamage = 20;
-                } else {
-                    computerAttack = "Origami Strike";
-                    computerDamage = 30;
-                }
-
-            } else if (computerFighter.equals("scissors")) {
-
-                if (computerAttackChoice == 1) {
-                    computerAttack = "Snip";
-                    computerDamage = 10;
-                } else if (computerAttackChoice == 2) {
-                    computerAttack = "Double Cut";
-                    computerDamage = 20;
-                } else {
-                    computerAttack = "Blade Rush";
-                    computerDamage = 30;
-                }
-
-            } else if (computerFighter.equals("lizard")) {
-
-                if (computerAttackChoice == 1) {
-                    computerAttack = "Bite";
-                    computerDamage = 10;
-                } else if (computerAttackChoice == 2) {
-                    computerAttack = "Tail Swipe";
-                    computerDamage = 20;
-                } else {
-                    computerAttack = "Poison Spit";
-                    computerDamage = 30;
-                }
-
-            } else if (computerFighter.equals("spock")) {
-
-                if (computerAttackChoice == 1) {
-                    computerAttack = "Vulcan Chop";
-                    computerDamage = 10;
-                } else if (computerAttackChoice == 2) {
-                    computerAttack = "Logic Blast";
-                    computerDamage = 20;
-                } else {
-                    computerAttack = "Mind Meld";
-                    computerDamage = 30;
-                }
-            }
-
-            // -------------------------
-            // TYPE ADVANTAGES
-            // -------------------------
-
-            boolean playerHasAdvantage =
-                    (playerFighter.equals("rock") &&
-                            (computerFighter.equals("scissors")
-                                    || computerFighter.equals("lizard"))) ||
-
-                            (playerFighter.equals("paper") &&
-                                    (computerFighter.equals("rock")
-                                            || computerFighter.equals("spock"))) ||
-
-                            (playerFighter.equals("scissors") &&
-                                    (computerFighter.equals("paper")
-                                            || computerFighter.equals("lizard"))) ||
-
-                            (playerFighter.equals("lizard") &&
-                                    (computerFighter.equals("paper")
-                                            || computerFighter.equals("spock"))) ||
-
-                            (playerFighter.equals("spock") &&
-                                    (computerFighter.equals("rock")
-                                            || computerFighter.equals("scissors")));
-
-            boolean computerHasAdvantage =
-                    (computerFighter.equals("rock") &&
-                            (playerFighter.equals("scissors")
-                                    || playerFighter.equals("lizard"))) ||
-
-                            (computerFighter.equals("paper") &&
-                                    (playerFighter.equals("rock")
-                                            || playerFighter.equals("spock"))) ||
-
-                            (computerFighter.equals("scissors") &&
-                                    (playerFighter.equals("paper")
-                                            || playerFighter.equals("lizard"))) ||
-
-                            (computerFighter.equals("lizard") &&
-                                    (playerFighter.equals("paper")
-                                            || playerFighter.equals("spock"))) ||
-
-                            (computerFighter.equals("spock") &&
-                                    (playerFighter.equals("rock")
-                                            || playerFighter.equals("scissors")));
-
-            // -------------------------
+            // =================================================
             // PLAYER TURN
-            // -------------------------
+            // =================================================
 
-            System.out.println("\nYou used " + playerAttack + "!");
+            System.out.println("\nYour " + playerCreature.getName() + " used " + playerMove.getName() + "!");
 
-            if (playerHasAdvantage) {
-                System.out.println("It's super effective!");
-                playerDamage += 10;
+            // --------------------------------
+            // PLAYER ATTACK MOVE
+            // --------------------------------
+
+
+            if (playerMove.getMoveCategory().equalsIgnoreCase("ATTACK")) {
+
+                boolean playerHit = random.nextInt(100) < playerMove.getAccuracy();
+
+                if (playerHit) {
+
+                    boolean playerHasAdvantage = typeAdvantageRepository.hasAdvantage(playerMove.getType(), computerCreature.getType());
+
+                    int playerDamage = playerMove.getDamage() + playerAttackStat - (computerDefenseStat / 2);
+
+                    if (playerDamage < 1) {
+                        playerDamage = 1;
+                    }
+
+                    if (playerHasAdvantage) {
+
+                        playerDamage = (int) (playerDamage * 1.5);
+
+                        System.out.println(
+                                "It's super effective!"
+                        );
+                    }
+
+                    computerHP -= playerDamage;
+
+                    if (computerHP < 0) {
+                        computerHP = 0;
+                    }
+
+                    System.out.println("Opponent's " + computerCreature.getName() + " took " + playerDamage + " damage!");
+
+                } else {
+
+                    System.out.println("Your " + playerCreature.getName() + "'s attack missed!");
+                }
+
+
+                // --------------------------------
+                // PLAYER HEAL MOVE
+                // --------------------------------
+
+            } else if (
+                    playerMove
+                            .getMoveCategory()
+                            .equalsIgnoreCase("HEAL")
+            ) {
+
+                int healAmount =
+                        playerMove.getEffectValue();
+
+                playerHP +=
+                        healAmount;
+
+                if (
+                        playerHP >
+                                playerCreature.getBaseHp()
+                ) {
+
+                    playerHP =
+                            playerCreature.getBaseHp();
+                }
+
+                System.out.println("Your " + playerCreature.getName() + " recovered " + healAmount + " HP!");
+
+
+                // --------------------------------
+                // PLAYER DEFENSE MOVE
+                // --------------------------------
+
+            } else if (
+                    playerMove
+                            .getMoveCategory()
+                            .equalsIgnoreCase("DEFENSE")
+            ) {
+
+                int defenseBoost =
+                        playerMove.getEffectValue();
+
+                playerDefenseStat +=
+                        defenseBoost;
+
+                System.out.println("Your " + playerCreature.getName() + "'s defense increased by " + defenseBoost + "!");
+
+
+                // --------------------------------
+                // PLAYER STATUS MOVE
+                // --------------------------------
+
+            } else if (
+                    playerMove
+                            .getMoveCategory()
+                            .equalsIgnoreCase("STATUS")
+            ) {
+
+                if (playerMove.getDamage() > 0) {
+
+                    boolean playerHit = random.nextInt(100) < playerMove.getAccuracy();
+
+                    if (playerHit) {
+
+                        boolean playerHasAdvantage = typeAdvantageRepository.hasAdvantage(playerMove.getType(), computerCreature.getType());
+
+                        int playerDamage = playerMove.getDamage() + playerAttackStat - (computerDefenseStat / 2);
+
+                        if (playerDamage < 1) {
+                            playerDamage = 1;
+                        }
+
+                        if (playerHasAdvantage) {
+
+                            playerDamage = (int) (playerDamage * 1.5);
+
+                            System.out.println("It's super effective!");
+                        }
+
+                        computerHP -= playerDamage;
+
+                        if (computerHP < 0) {
+                            computerHP = 0;
+                        }
+
+                        System.out.println("Opponent's " + computerCreature.getName() + " took " + playerDamage + " damage!"
+                        );
+
+                    } else {
+
+                        System.out.println("Your " + playerCreature.getName() + "'s move missed!");
+                    }
+
+                } else {
+
+                    System.out.println("The status effect takes hold!");
+                }
             }
 
-            computerHP -= playerDamage;
 
-            if (computerHP < 0) {
-                computerHP = 0;
-            }
+            // --------------------------------
+            // CHECK COMPUTER HP
+            // --------------------------------
 
-            System.out.println(
-                    computerFighter + " took "
-                            + playerDamage + " damage!"
-            );
-
-            // Stop battle if computer fainted
             if (computerHP <= 0) {
                 break;
             }
 
-            // -------------------------
+            // =================================================
             // COMPUTER TURN
-            // -------------------------
+            // =================================================
 
-            System.out.println(
-                    "\nOpponent used " + computerAttack + "!"
-            );
+            System.out.println("Opponent's " + computerCreature.getName() + " used " + computerMove.getName() + "!");
 
-            if (computerHasAdvantage) {
-                System.out.println("It's super effective!");
-                computerDamage += 10;
+
+            // -------------------------------
+            // COMPUTER ATTACK MOVE
+            // --------------------------------
+
+            if (computerMove.getMoveCategory().equalsIgnoreCase("ATTACK")) {
+
+                boolean computerHit = random.nextInt(100) < computerMove.getAccuracy();
+
+                if (computerHit) {
+
+                    boolean computerHasAdvantage = typeAdvantageRepository.hasAdvantage(computerMove.getType(), playerCreature.getType());
+
+                    int computerDamage = computerMove.getDamage() + computerAttackStat - (playerDefenseStat / 2);
+
+                    if (computerDamage < 1) {
+                        computerDamage = 1;
+                    }
+
+                    if (computerHasAdvantage) {
+
+                        computerDamage = (int) (computerDamage * 1.5);
+
+                        System.out.println(
+                                "It's super effective!"
+                        );
+                    }
+
+                    playerHP -= computerDamage;
+
+                    if (playerHP < 0) {
+                        playerHP = 0;
+                    }
+
+                    System.out.println("Your " + playerCreature.getName() + " took " + computerDamage + " damage!"
+                    );
+
+                } else {
+
+                    System.out.println("Opponent's " + computerCreature.getName() + "'s attack missed!");
+                }
+
+
+                // --------------------------------
+                // COMPUTER HEAL MOVE
+                // --------------------------------
+
+            } else if (computerMove.getMoveCategory().equalsIgnoreCase("HEAL")) {
+
+                int healAmount = computerMove.getEffectValue();
+
+                computerHP += healAmount;
+
+                if (computerHP > computerCreature.getBaseHp()) {
+
+                    computerHP = computerCreature.getBaseHp();
+                }
+
+                System.out.println("Opponent's " + computerCreature.getName() + " recovered " + healAmount + " HP!");
+
+
+                // --------------------------------
+                // COMPUTER DEFENSE MOVE
+                // --------------------------------
+
+            } else if (computerMove.getMoveCategory().equalsIgnoreCase("DEFENSE")) {
+
+                int defenseBoost = computerMove.getEffectValue();
+
+                computerDefenseStat += defenseBoost;
+
+                System.out.println("Opponent's " + computerCreature.getName() + "'s defense increased by " + defenseBoost + "!");
+
+
+                // --------------------------------
+                // COMPUTER STATUS MOVE
+                // --------------------------------
+
+            } else if (computerMove.getMoveCategory().equalsIgnoreCase("STATUS")) {
+
+                if (computerMove.getDamage() > 0) {
+
+                    boolean computerHit = random.nextInt(100) < computerMove.getAccuracy();
+
+                    if (computerHit) {
+
+                        boolean computerHasAdvantage = typeAdvantageRepository.hasAdvantage(computerMove.getType(), playerCreature.getType());
+
+                        int computerDamage = computerMove.getDamage() + computerAttackStat - (playerDefenseStat / 2);
+
+                        if (computerDamage < 1) {
+                            computerDamage = 1;
+                        }
+
+                        if (computerHasAdvantage) {
+
+                            computerDamage = (int) (computerDamage * 1.5);
+
+                            System.out.println("It's super effective!");
+                        }
+
+                        playerHP -= computerDamage;
+
+                        if (playerHP < 0) {
+                            playerHP = 0;
+                        }
+
+                        System.out.println("Your " + playerCreature.getName() + " took " + computerDamage + " damage!");
+
+                    } else {
+
+                        System.out.println("Opponent's " + computerCreature.getName() + "'s move missed!");
+                    }
+
+                } else {
+
+                    System.out.println("The status effect takes hold!");
+                }
             }
-
-            playerHP -= computerDamage;
-
-            if (playerHP < 0) {
-                playerHP = 0;
-            }
-
-            System.out.println(
-                    playerFighter + " took "
-                            + computerDamage + " damage!"
-            );
         }
+
 
         // -------------------------
         // RESULTS
@@ -395,24 +462,29 @@ public class Main {
 
         System.out.println("\n============================");
 
-        if (computerHP <= 0) {
+        if (playerHP > 0) {
+
+            System.out.println("Opponent's " + computerCreature.getName() + " fainted!");
+
+            System.out.println("Your " + playerCreature.getName() + " wins!");
 
             System.out.println(
-                    computerFighter + " fainted!"
+                    "You won the battle!"
             );
-
-            System.out.println("You won the battle!");
 
         } else {
 
-            System.out.println(
-                    playerFighter + " fainted!"
-            );
+            System.out.println("Your " + playerCreature.getName() + " fainted!");
 
-            System.out.println("You lost the battle!");
+            System.out.println("Opponent's " + computerCreature.getName() + " wins!");
+
+            System.out.println(
+                    "You lost the battle!"
+            );
         }
 
         System.out.println("============================");
-*/
+        scanner.close();
+
     }
 }
