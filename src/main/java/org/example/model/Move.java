@@ -10,6 +10,7 @@ public class Move {
     private String description;
     private String moveCategory;
     private int effectValue;
+    private String effectType;
 
     public Move(
             int id,
@@ -19,7 +20,8 @@ public class Move {
             int accuracy,
             String description,
             String moveCategory,
-            int effectValue
+            int effectValue,
+            String effectType
     ) {
         this.id = id;
         this.name = name;
@@ -29,6 +31,7 @@ public class Move {
         this.description = description;
         this.moveCategory = moveCategory;
         this.effectValue = effectValue;
+        this.effectType = effectType;
     }
 
     public int getId() {
@@ -61,5 +64,9 @@ public class Move {
 
     public int getEffectValue() {
         return effectValue;
+    }
+
+    public String getEffectType() {
+        return effectType;
     }
 }

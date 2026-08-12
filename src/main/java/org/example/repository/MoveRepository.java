@@ -26,7 +26,8 @@ public class MoveRepository {
                     m.accuracy,
                     m.description,
                     m.move_category,
-                    m.effect_value
+                    m.effect_value,
+                    m.effect_type
                 FROM moves m
                 JOIN creature_types ct
                     ON m.type_id = ct.id
@@ -58,7 +59,8 @@ public class MoveRepository {
                             results.getInt("accuracy"),
                             results.getString("description"),
                             results.getString("move_category"),
-                            results.getInt("effect_value")
+                            results.getInt("effect_value"),
+                            results.getString("effect_type")
                     );
 
                     moves.add(move);
