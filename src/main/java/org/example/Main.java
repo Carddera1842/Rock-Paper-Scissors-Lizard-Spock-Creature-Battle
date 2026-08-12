@@ -1,5 +1,9 @@
 package org.example;
 
+import org.example.model.Creature;
+import org.example.repository.CreatureRepository;
+
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -7,14 +11,12 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         Random random = new Random();
-        String[] options = {"rock",
-                            "paper",
-                            "scissors",
-                            "lizard",
-                            "spock"};
 
-        int playerHP = 100;
-        int computerHP = 100;
+        CreatureRepository repository =
+                new CreatureRepository();
+
+        List<Creature> creatures =
+                repository.findAll();
 
         System.out.println("Welcome to RPSLS Battle!");
 
@@ -26,36 +28,60 @@ public class Main {
         // CHOOSE FIGHTER
         // -------------------------
 
-        System.out.println("\nChoose your fighter!");
-        System.out.println("1. Rock");
-        System.out.println("2. Paper");
-        System.out.println("3. Scissors");
-        System.out.println("4. Lizard");
-        System.out.println("5. Spock");
+        System.out.println("\nChoose your creature!");
 
-        System.out.print("Enter your choice: ");
+        for (int i = 0; i < creatures.size(); i++) {
+
+            Creature creature = creatures.get(i);
+
+            System.out.println(
+                    (i + 1) + ". " +
+                            creature.getName() +
+                            " [" + creature.getType() + "]" +
+                            " HP: " + creature.getBaseHp()
+            );
+        }
+
+        System.out.print("\nEnter your choice: ");
 
         int choice = scanner.nextInt();
         scanner.nextLine();
 
-        while (choice < 1 || choice > 5) {
+        while (choice < 1 || choice > creatures.size()) {
+
             System.out.print(
-                    "Invalid choice. Choose 1, 2, 3, 4, or 5: "
+                    "Invalid choice. Choose 1-" +
+                            creatures.size() + ": "
             );
 
             choice = scanner.nextInt();
             scanner.nextLine();
         }
 
-        String playerFighter = options[choice - 1];
+        Creature playerCreature =
+                creatures.get(choice - 1);
 
-        // Computer randomly chooses a fighter
-        int computerChoice = random.nextInt(5);
-        String computerFighter = options[computerChoice];
+        Creature computerCreature =
+                creatures.get(random.nextInt(creatures.size()));
 
-        System.out.println("\nYou chose " + playerFighter + "!");
+        int playerHP = playerCreature.getBaseHp();
+        int computerHP = computerCreature.getBaseHp();
+
         System.out.println(
-                "Your opponent chose " + computerFighter + "!"
+                "\nYou chose " + playerCreature.getName() + "!"
+        );
+
+        System.out.println(
+                "Type: " + playerCreature.getType()
+        );
+
+        System.out.println(
+                "\nYour opponent chose " +
+                        computerCreature.getName() + "!"
+        );
+
+        System.out.println(
+                "Type: " + computerCreature.getType()
         );
 
         System.out.println("\nBattle Start!");
@@ -63,7 +89,7 @@ public class Main {
         // -------------------------
         // BATTLE LOOP
         // -------------------------
-
+/*
         while (playerHP > 0 && computerHP > 0) {
 
             System.out.println("\n----------------------------");
@@ -387,6 +413,6 @@ public class Main {
         }
 
         System.out.println("============================");
-
+*/
     }
 }
