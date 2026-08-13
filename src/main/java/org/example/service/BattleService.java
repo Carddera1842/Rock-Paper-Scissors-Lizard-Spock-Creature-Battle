@@ -32,31 +32,13 @@ public class BattleService {
             boolean playerTurn
     ) {
 
-        String attackerPrefix =
-                playerTurn
-                        ? "Your "
-                        : "Opponent's ";
+        String attackerPrefix = playerTurn ? "Your " : "Opponent's ";
 
-        String defenderPrefix =
-                playerTurn
-                        ? "Opponent's "
-                        : "Your ";
+        String defenderPrefix = playerTurn ? "Opponent's " : "Your ";
 
-        System.out.println(
-                "\n" +
-                        attackerPrefix +
-                        attacker
-                                .getCreature()
-                                .getName() +
-                        " used " +
-                        move.getName() +
-                        "!"
-        );
+        System.out.println("\n" + attackerPrefix + attacker.getCreature().getName() + " used " + move.getName() + "!");
 
-        String category =
-                move
-                        .getMoveCategory()
-                        .toUpperCase();
+        String category = move.getMoveCategory().toUpperCase();
 
         switch (category) {
 
@@ -110,10 +92,7 @@ public class BattleService {
 
             default:
 
-                System.out.println(
-                        "Unknown move category: " +
-                                category
-                );
+                System.out.println("Unknown move category: " + category);
         }
     }
 
@@ -130,61 +109,27 @@ public class BattleService {
             String defenderPrefix
     ) {
 
-        boolean hit =
-                checkAccuracy(
-                        move
-                );
+        boolean hit = checkAccuracy(move);
 
         if (!hit) {
 
-            System.out.println(
-                    attackerPrefix +
-                            attacker
-                                    .getCreature()
-                                    .getName() +
-                            "'s attack missed!"
-            );
+            System.out.println(attackerPrefix + attacker.getCreature().getName() + "'s attack missed!");
 
             return;
         }
 
-        boolean hasAdvantage =
-                typeAdvantageRepository
-                        .hasAdvantage(
-                                move.getType(),
-                                defender
-                                        .getCreature()
-                                        .getType()
-                        );
+        boolean hasAdvantage = typeAdvantageRepository.hasAdvantage(move.getType(), defender.getCreature().getType());
 
-        int damage =
-                calculateDamage(
-                        attacker,
-                        defender,
-                        move,
-                        hasAdvantage
-                );
+        int damage = calculateDamage(attacker, defender, move, hasAdvantage);
 
         if (hasAdvantage) {
 
-            System.out.println(
-                    "It's super effective!"
-            );
+            System.out.println("It's super effective!");
         }
 
-        defender.takeDamage(
-                damage
-        );
+        defender.takeDamage(damage);
 
-        System.out.println(
-                defenderPrefix +
-                        defender
-                                .getCreature()
-                                .getName() +
-                        " took " +
-                        damage +
-                        " damage!"
-        );
+        System.out.println(defenderPrefix + defender.getCreature().getName() + " took " + damage + " damage!");
     }
 
 
@@ -198,26 +143,13 @@ public class BattleService {
             String attackerPrefix
     ) {
 
-        int beforeHp =
-                attacker.getCurrentHp();
+        int beforeHp = attacker.getCurrentHp();
 
-        attacker.heal(
-                move.getEffectValue()
-        );
+        attacker.heal(move.getEffectValue());
 
-        int actualHeal =
-                attacker.getCurrentHp()
-                        - beforeHp;
+        int actualHeal = attacker.getCurrentHp() - beforeHp;
 
-        System.out.println(
-                attackerPrefix +
-                        attacker
-                                .getCreature()
-                                .getName() +
-                        " recovered " +
-                        actualHeal +
-                        " HP!"
-        );
+        System.out.println(attackerPrefix + attacker.getCreature().getName() + " recovered " + actualHeal + " HP!");
     }
 
 
@@ -231,22 +163,11 @@ public class BattleService {
             String attackerPrefix
     ) {
 
-        int defenseBoost =
-                move.getEffectValue();
+        int defenseBoost = move.getEffectValue();
 
-        attacker.increaseDefense(
-                defenseBoost
-        );
+        attacker.increaseDefense(defenseBoost);
 
-        System.out.println(
-                attackerPrefix +
-                        attacker
-                                .getCreature()
-                                .getName() +
-                        "'s defense increased by " +
-                        defenseBoost +
-                        "!"
-        );
+        System.out.println(attackerPrefix + attacker.getCreature().getName() + "'s defense increased by " + defenseBoost + "!");
     }
 
 
@@ -266,11 +187,7 @@ public class BattleService {
 
         if (!hit) {
 
-            System.out.println(
-                    attackerPrefix +
-                            attacker.getCreature().getName() +
-                            "'s move missed!"
-            );
+            System.out.println(attackerPrefix + attacker.getCreature().getName() + "'s move missed!");
 
             return;
         }
@@ -282,35 +199,17 @@ public class BattleService {
 
         if (move.getDamage() > 0) {
 
-            boolean hasAdvantage =
-                    typeAdvantageRepository.hasAdvantage(
-                            move.getType(),
-                            defender.getCreature().getType()
-                    );
+            boolean hasAdvantage = typeAdvantageRepository.hasAdvantage(move.getType(), defender.getCreature().getType());
 
-            int damage =
-                    calculateDamage(
-                            attacker,
-                            defender,
-                            move,
-                            hasAdvantage
-                    );
+            int damage = calculateDamage(attacker, defender, move, hasAdvantage);
 
             if (hasAdvantage) {
-                System.out.println(
-                        "It's super effective!"
-                );
+                System.out.println("It's super effective!");
             }
 
             defender.takeDamage(damage);
 
-            System.out.println(
-                    defenderPrefix +
-                            defender.getCreature().getName() +
-                            " took " +
-                            damage +
-                            " damage!"
-            );
+            System.out.println(defenderPrefix + defender.getCreature().getName() + " took " + damage + " damage!");
 
             // Don't apply a status effect
             // if the attack already caused a faint.
@@ -328,11 +227,7 @@ public class BattleService {
 
         if (effectType == null || effectType.isBlank()) {
 
-            System.out.println(
-                    "No status effect is configured for " +
-                            move.getName() +
-                            "."
-            );
+            System.out.println("No status effect is configured for " + move.getName() + ".");
 
             return;
         }
@@ -345,15 +240,9 @@ public class BattleService {
 
             case "POISON":
 
-                defender.applyPoison(
-                        move.getEffectValue()
-                );
+                defender.applyPoison(move.getEffectValue());
 
-                System.out.println(
-                        defenderPrefix +
-                                defender.getCreature().getName() +
-                                " was poisoned!"
-                );
+                System.out.println(defenderPrefix + defender.getCreature().getName() + " was poisoned!");
 
                 break;
 
@@ -364,17 +253,9 @@ public class BattleService {
 
             case "ATTACK_UP":
 
-                attacker.increaseAttack(
-                        move.getEffectValue()
-                );
+                attacker.increaseAttack(move.getEffectValue());
 
-                System.out.println(
-                        attackerPrefix +
-                                attacker.getCreature().getName() +
-                                "'s attack increased by " +
-                                move.getEffectValue() +
-                                "!"
-                );
+                System.out.println(attackerPrefix + attacker.getCreature().getName() + "'s attack increased by " + move.getEffectValue() + "!");
 
                 break;
 
@@ -385,17 +266,9 @@ public class BattleService {
 
             case "ATTACK_DOWN":
 
-                defender.decreaseAttack(
-                        move.getEffectValue()
-                );
+                defender.decreaseAttack(move.getEffectValue());
 
-                System.out.println(
-                        defenderPrefix +
-                                defender.getCreature().getName() +
-                                "'s attack decreased by " +
-                                move.getEffectValue() +
-                                "!"
-                );
+                System.out.println(defenderPrefix + defender.getCreature().getName() + "'s attack decreased by " + move.getEffectValue() + "!");
 
                 break;
 
@@ -406,17 +279,9 @@ public class BattleService {
 
             case "DEFENSE_UP":
 
-                attacker.increaseDefense(
-                        move.getEffectValue()
-                );
+                attacker.increaseDefense(move.getEffectValue());
 
-                System.out.println(
-                        attackerPrefix +
-                                attacker.getCreature().getName() +
-                                "'s defense increased by " +
-                                move.getEffectValue() +
-                                "!"
-                );
+                System.out.println(attackerPrefix + attacker.getCreature().getName() + "'s defense increased by " + move.getEffectValue() + "!");
 
                 break;
 
@@ -427,17 +292,9 @@ public class BattleService {
 
             case "DEFENSE_DOWN":
 
-                defender.decreaseDefense(
-                        move.getEffectValue()
-                );
+                defender.decreaseDefense(move.getEffectValue());
 
-                System.out.println(
-                        defenderPrefix +
-                                defender.getCreature().getName() +
-                                "'s defense decreased by " +
-                                move.getEffectValue() +
-                                "!"
-                );
+                System.out.println(defenderPrefix + defender.getCreature().getName() + "'s defense decreased by " + move.getEffectValue() + "!");
 
                 break;
 
@@ -448,10 +305,7 @@ public class BattleService {
 
             default:
 
-                System.out.println(
-                        "Unknown status effect: " +
-                                effectType
-                );
+                System.out.println("Unknown status effect: " + effectType);
         }
     }
 
@@ -460,12 +314,9 @@ public class BattleService {
     // ACCURACY
     // =====================================================
 
-    private boolean checkAccuracy(
-            Move move
-    ) {
+    private boolean checkAccuracy(Move move) {
 
-        return random.nextInt(100) <
-                move.getAccuracy();
+        return random.nextInt(100) < move.getAccuracy();
     }
 
 
@@ -480,13 +331,7 @@ public class BattleService {
             boolean hasAdvantage
     ) {
 
-        int damage =
-                move.getDamage()
-                        + attacker.getCurrentAttack()
-                        - (
-                        defender.getCurrentDefense()
-                                / 2
-                );
+        int damage = move.getDamage() + (attacker.getCurrentAttack() / 2) - (defender.getCurrentDefense() / 3);
 
         if (damage < 1) {
             damage = 1;
@@ -494,10 +339,7 @@ public class BattleService {
 
         if (hasAdvantage) {
 
-            damage =
-                    (int) (
-                            damage * 1.5
-                    );
+            damage = (int) (damage * 1.25);
         }
 
         return damage;

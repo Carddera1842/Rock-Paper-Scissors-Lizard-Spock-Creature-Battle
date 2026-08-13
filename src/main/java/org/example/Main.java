@@ -1,10 +1,16 @@
 package org.example;
 
 import org.example.model.Creature;
-import org.example.repository.CreatureRepository;
 import org.example.model.Move;
-import org.example.repository.MoveRepository;
 import org.example.model.BattleCreature;
+import org.example.model.Player;
+import org.example.model.PlayerCreature;
+
+import org.example.repository.CreatureRepository;
+import org.example.repository.MoveRepository;
+import org.example.repository.PlayerRepository;
+import org.example.repository.PlayerCreatureRepository;
+
 import org.example.service.BattleService;
 import org.example.service.ComputerAIService;
 
@@ -30,6 +36,10 @@ public class Main {
 
         ComputerAIService computerAIService = new ComputerAIService();
 
+        PlayerRepository playerRepository = new PlayerRepository();
+
+        PlayerCreatureRepository playerCreatureRepository = new PlayerCreatureRepository();
+
         // --------------------------------
         // LOAD CREATURES FROM DATABASE
         // --------------------------------
@@ -52,37 +62,255 @@ public class Main {
         System.out.println("        BATTLE TIME!");
         System.out.println("===========================");
 
-        // -------------------------
-        // CHOOSE FIGHTER
-        // -------------------------
+        // =====================================================
+        // PLAYER MENU
+        // =====================================================
 
-        System.out.println("\nChoose your creature!");
+        System.out.println("\n1. New Player");
+        System.out.println("2. Load Player");
+        System.out.println("3. Exit");
 
-        for (int i = 0; i < creatures.size(); i++) {
+        System.out.print("\nChoose an option: ");
 
-            Creature creature = creatures.get(i);
-
-            System.out.println((i + 1) + ". " + creature.getName() + " [" + creature.getType() + "]" + " | HP: " + creature.getBaseHp() + " | ATK: " + creature.getAttack() + " | DEF: " + creature.getDefense() + " | SPD: " + creature.getSpeed());
-        }
-
-        System.out.print("\nEnter your choice: ");
-
-        int choice = scanner.nextInt();
+        int menuChoice = scanner.nextInt();
         scanner.nextLine();
 
-        while (choice < 1 || choice > creatures.size()) {
+        while (menuChoice < 1 || menuChoice > 3) {
 
-            System.out.print("Invalid choice. Choose 1-" + creatures.size() + ": ");
+            System.out.print("Invalid choice. Choose 1, 2, or 3: ");
 
-            choice = scanner.nextInt();
+            menuChoice = scanner.nextInt();
             scanner.nextLine();
         }
 
-        // --------------------------------
-        // SELECT CREATURES
-        // --------------------------------
+        if (menuChoice == 3) {
 
-        Creature playerCreature = creatures.get(choice - 1);
+            System.out.println("Thanks for playing!");
+
+            scanner.close();
+            return;
+        }
+
+        Player currentPlayer;
+
+
+        // =====================================================
+        // NEW PLAYER
+        // =====================================================
+
+        if (menuChoice == 1) {
+
+            System.out.print("\nChoose a username: ");
+
+            String username = scanner.nextLine().trim();
+
+            while (username.isBlank() || playerRepository.existsByUsername(username)) {
+
+                if (username.isBlank()) {
+
+                    System.out.println("Username cannot be blank.");
+
+                } else {
+
+                    System.out.println("That username already exists.");
+                }
+
+                System.out.print("Choose another username: ");
+
+                username = scanner.nextLine().trim();
+            }
+
+            currentPlayer = playerRepository.create(username);
+
+            if (currentPlayer == null) {
+
+                System.out.println("Could not create player.");
+
+                scanner.close();
+                return;
+            }
+
+            System.out.println("\nWelcome, " + currentPlayer.getUsername() + "!");
+
+
+            // =================================================
+            // CHOOSE STARTER
+            // =================================================
+
+            System.out.println("\nChoose your starter creature!\n");
+
+            for (int i = 0; i < creatures.size(); i++) {
+
+                Creature creature = creatures.get(i);
+
+                System.out.println((i + 1) + ". " + creature.getName() + " [" + creature.getType() + "]");
+            }
+
+            System.out.print("\nStarter: ");
+
+            int starterChoice = scanner.nextInt();
+
+            scanner.nextLine();
+
+            while (starterChoice < 1 || starterChoice > creatures.size()) {
+
+                System.out.print("Invalid choice. Choose 1-" + creatures.size() + ": ");
+
+                starterChoice = scanner.nextInt();
+
+                scanner.nextLine();
+            }
+
+            Creature starter = creatures.get(starterChoice - 1);
+
+            playerCreatureRepository.addCreatureToPlayer(currentPlayer.getId(), starter.getId());
+
+            System.out.println("\n" + starter.getName() + " is now your first creature!");
+
+
+        // =====================================================
+        // LOAD PLAYER
+        // =====================================================
+
+        } else {
+
+            System.out.print("\nEnter your username: ");
+
+            String username = scanner.nextLine().trim();
+
+            currentPlayer = playerRepository.findByUsername(username);
+
+            if (currentPlayer == null) {
+
+                System.out.println("Player not found.");
+
+                scanner.close();
+                return;
+            }
+
+            System.out.println("\nWelcome back, " + currentPlayer.getUsername() + "!");
+        }
+
+        // =====================================================
+        // LOAD PLAYER'S CREATURES
+        // =====================================================
+
+        List<PlayerCreature> playerCreatures = playerCreatureRepository.findByPlayerId(currentPlayer.getId());
+
+        if (playerCreatures.isEmpty()) {
+
+            System.out.println("You don't own any creatures!");
+
+            scanner.close();
+            return;
+        }
+
+
+        // =====================================================
+// CHOOSE PLAYER CREATURE
+// =====================================================
+
+        PlayerCreature selectedPlayerCreature;
+
+
+// --------------------------------
+// ONLY ONE CREATURE
+// --------------------------------
+
+        if (playerCreatures.size() == 1) {
+
+            selectedPlayerCreature =
+                    playerCreatures.get(0);
+
+            System.out.println(
+                    "\n" +
+                            selectedPlayerCreature
+                                    .getCreature()
+                                    .getName() +
+                            " will battle for you!"
+            );
+
+
+// --------------------------------
+// MULTIPLE CREATURES
+// --------------------------------
+
+        } else {
+
+            System.out.println(
+                    "\nYour Creatures:\n"
+            );
+
+            for (int i = 0; i < playerCreatures.size(); i++) {
+
+                PlayerCreature owned =
+                        playerCreatures.get(i);
+
+                Creature creature =
+                        owned.getCreature();
+
+                System.out.println(
+                        (i + 1) +
+                                ". " +
+                                creature.getName() +
+                                " [" +
+                                creature.getType() +
+                                "]" +
+                                " | Level: " +
+                                owned.getLevel() +
+                                " | XP: " +
+                                owned.getExperience() +
+                                " | W: " +
+                                owned.getWins() +
+                                " | L: " +
+                                owned.getLosses()
+                );
+            }
+
+            System.out.print(
+                    "\nChoose your creature: "
+            );
+
+            int creatureChoice =
+                    scanner.nextInt();
+
+            scanner.nextLine();
+
+            while (
+                    creatureChoice < 1 ||
+                            creatureChoice > playerCreatures.size()
+            ) {
+
+                System.out.print(
+                        "Invalid choice. Choose 1-" +
+                                playerCreatures.size() +
+                                ": "
+                );
+
+                creatureChoice =
+                        scanner.nextInt();
+
+                scanner.nextLine();
+            }
+
+            selectedPlayerCreature =
+                    playerCreatures.get(
+                            creatureChoice - 1
+                    );
+        }
+
+
+        // =====================================================
+        // GET BASE CREATURE
+        // =====================================================
+
+        Creature playerCreature =
+                selectedPlayerCreature.getCreature();
+
+
+        // =====================================================
+        // SELECT COMPUTER CREATURE
+        // =====================================================
 
         Creature computerCreature = creatures.get(random.nextInt(creatures.size()));
 
@@ -340,27 +568,77 @@ public class Main {
         }
 
 
-        // -------------------------
-        // RESULTS
-        // -------------------------
+        // =====================================================
+// RESULTS / SAVE PROGRESS
+// =====================================================
 
         System.out.println("\n============================");
 
         if (!player.isFainted()) {
 
-            System.out.println("Opponent's " + computerCreature.getName() + " fainted!");
+            System.out.println(
+                    "Opponent's " +
+                            computerCreature.getName() +
+                            " fainted!"
+            );
 
-            System.out.println("Your " + playerCreature.getName() + " wins!");
+            System.out.println(
+                    "Your " +
+                            playerCreature.getName() +
+                            " wins!"
+            );
 
             System.out.println("You won the battle!");
 
+            int xpEarned = 50;
+
+            selectedPlayerCreature.addWin();
+            selectedPlayerCreature.addExperience(xpEarned);
+
+            playerCreatureRepository.updateProgress(
+                    selectedPlayerCreature
+            );
+
+            System.out.println(
+                    "\n" +
+                            playerCreature.getName() +
+                            " gained " +
+                            xpEarned +
+                            " XP!"
+            );
+
         } else {
 
-            System.out.println("Your " + playerCreature.getName() + " fainted!");
+            System.out.println(
+                    "Your " +
+                            playerCreature.getName() +
+                            " fainted!"
+            );
 
-            System.out.println("Opponent's " + computerCreature.getName() + " wins!");
+            System.out.println(
+                    "Opponent's " +
+                            computerCreature.getName() +
+                            " wins!"
+            );
 
             System.out.println("You lost the battle!");
+
+            int xpEarned = 20;
+
+            selectedPlayerCreature.addLoss();
+            selectedPlayerCreature.addExperience(xpEarned);
+
+            playerCreatureRepository.updateProgress(
+                    selectedPlayerCreature
+            );
+
+            System.out.println(
+                    "\n" +
+                            playerCreature.getName() +
+                            " gained " +
+                            xpEarned +
+                            " XP!"
+            );
         }
 
         System.out.println("============================");
