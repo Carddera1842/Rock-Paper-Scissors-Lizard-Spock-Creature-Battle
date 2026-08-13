@@ -125,6 +125,39 @@ public class Main {
 
         System.out.println("\nBattle Start!");
 
+        // --------------------------------
+        // DISPLAY SPEED ADVANTAGE
+        // --------------------------------
+
+        if (
+                playerCreature.getSpeed() >
+                        computerCreature.getSpeed()
+        ) {
+
+            System.out.println(
+                    "\nYour " +
+                            playerCreature.getName() +
+                            " is faster!"
+            );
+
+        } else if (
+                computerCreature.getSpeed() >
+                        playerCreature.getSpeed()
+        ) {
+
+            System.out.println(
+                    "\nOpponent's " +
+                            computerCreature.getName() +
+                            " is faster!"
+            );
+
+        } else {
+
+            System.out.println(
+                    "\nBoth creatures have the same speed!"
+            );
+        }
+
         // -------------------------
         // BATTLE LOOP
         // -------------------------
@@ -153,65 +186,121 @@ public class Main {
 
             System.out.print("Move: ");
 
-            int attackChoice = scanner.nextInt();
+            int moveChoice =
+                    scanner.nextInt();
+
             scanner.nextLine();
 
-            while (attackChoice < 1 || attackChoice > playerMoves.size()) {
-                System.out.print("Invalid move. Choose 1-" + playerMoves.size() + ": ");
+            while (
+                    moveChoice < 1 ||
+                            moveChoice >
+                                    playerMoves.size()
+            ) {
 
-                attackChoice = scanner.nextInt();
+                System.out.print(
+                        "Invalid move. Choose 1-" +
+                                playerMoves.size() +
+                                ": "
+                );
+
+                moveChoice =
+                        scanner.nextInt();
+
                 scanner.nextLine();
             }
+
 
             // --------------------------------
             // CHOOSE MOVES
             // --------------------------------
 
-            Move playerMove = playerMoves.get(attackChoice - 1);
+            Move playerMove = playerMoves.get(moveChoice - 1);
 
             Move computerMove = computerMoves.get(random.nextInt(computerMoves.size()));
 
-
-            // =================================================
-            // PLAYER TURN
-            // =================================================
-
-            System.out.println("\nYour " + playerCreature.getName() + " used " + playerMove.getName() + "!");
-
             // --------------------------------
-            // PLAYER ATTACK MOVE
+            // DETERMINE TURN ORDER
             // --------------------------------
 
+            boolean playerGoesFirst;
 
-            battleService.executeMove(
-                    player,
-                    computer,
-                    playerMove,
-                    true
-            );
+            if (
+                    playerCreature.getSpeed() >
+                            computerCreature.getSpeed()
+            ) {
 
+                playerGoesFirst = true;
 
-            // --------------------------------
-            // CHECK COMPUTER HP
-            // --------------------------------
+            } else if (
+                    computerCreature.getSpeed() >
+                            playerCreature.getSpeed()
+            ) {
 
-            if (computer.isFainted()) {
-                break;
+                playerGoesFirst = false;
+
+            } else {
+
+                // Same speed
+                playerGoesFirst =
+                        random.nextBoolean();
             }
 
+
+
             // =================================================
-            // COMPUTER TURN
+            // EXECUTE TURNS
             // =================================================
 
-            battleService.executeMove(
-                    computer,
-                    player,
-                    computerMove,
-                    false
-            );
+            if (playerGoesFirst) {
+
+                // -------------------------
+                // PLAYER FIRST
+                // -------------------------
+
+                battleService.executeMove(
+                        player,
+                        computer,
+                        playerMove,
+                        true
+                );
+
+                if (!computer.isFainted()) {
+
+                    battleService.executeMove(
+                            computer,
+                            player,
+                            computerMove,
+                            false
+                    );
+                }
+
+            } else {
+
+                // -------------------------
+                // COMPUTER FIRST
+                // -------------------------
+
+                battleService.executeMove(
+                        computer,
+                        player,
+                        computerMove,
+                        false
+                );
+
+                if (!player.isFainted()) {
+
+                    battleService.executeMove(
+                            player,
+                            computer,
+                            playerMove,
+                            true
+                    );
+                }
+            }
+
 
             // --------------------------------
-            // OPTIONAL STATUS DAMAGE
+            // END-OF-ROUND POISON
             // --------------------------------
 
             if (!player.isFainted()) {
