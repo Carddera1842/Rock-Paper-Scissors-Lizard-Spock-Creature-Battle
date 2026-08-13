@@ -6,6 +6,7 @@ import org.example.model.Move;
 import org.example.repository.MoveRepository;
 import org.example.model.BattleCreature;
 import org.example.service.BattleService;
+import org.example.service.ComputerAIService;
 
 import java.util.List;
 import java.util.Random;
@@ -26,6 +27,8 @@ public class Main {
         MoveRepository moveRepository = new MoveRepository();
 
         BattleService battleService = new BattleService();
+
+        ComputerAIService computerAIService = new ComputerAIService();
 
         // --------------------------------
         // LOAD CREATURES FROM DATABASE
@@ -216,7 +219,7 @@ public class Main {
 
             Move playerMove = playerMoves.get(moveChoice - 1);
 
-            Move computerMove = computerMoves.get(random.nextInt(computerMoves.size()));
+            Move computerMove = computerAIService.chooseMove(computer, player, computerMoves);
 
             // --------------------------------
             // DETERMINE TURN ORDER
