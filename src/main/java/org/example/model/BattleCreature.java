@@ -7,6 +7,7 @@ public class BattleCreature {
     private int currentHp;
     private int currentAttack;
     private int currentDefense;
+    private int maxHp;
 
     private boolean poisoned;
     private int poisonDamage;
@@ -16,9 +17,10 @@ public class BattleCreature {
 
         int levelBonus = level - 1;
 
-        this.currentHp = creature.getBaseHp() + (levelBonus * 5);
         this.currentAttack = creature.getAttack() + (levelBonus * 2);
         this.currentDefense = creature.getDefense() + (levelBonus * 2);
+        this.maxHp = creature.getBaseHp() + (levelBonus *5);
+        this.currentHp = maxHp;
 
         this.poisoned = false;
         this.poisonDamage = 0;
@@ -38,6 +40,10 @@ public class BattleCreature {
 
     public int getCurrentDefense() {
         return currentDefense;
+    }
+
+    public int getMaxHp() {
+        return maxHp;
     }
 
     public boolean isPoisoned() {
@@ -65,8 +71,8 @@ public class BattleCreature {
 
         currentHp += amount;
 
-        if (currentHp > creature.getBaseHp()) {
-            currentHp = creature.getBaseHp();
+        if (currentHp > maxHp) {
+            currentHp = maxHp;
         }
     }
 
@@ -112,4 +118,5 @@ public class BattleCreature {
         poisoned = false;
         poisonDamage = 0;
     }
+
 }

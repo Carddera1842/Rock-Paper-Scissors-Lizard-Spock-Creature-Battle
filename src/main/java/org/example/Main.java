@@ -397,8 +397,8 @@ public class Main {
 
             System.out.println("\n----------------------------");
 
-            System.out.println(playerCreature.getName() + " HP: " + player.getCurrentHp()+ "/" + playerCreature.getBaseHp());
-            System.out.println(computerCreature.getName() + " HP: " + computer.getCurrentHp() + "/" + computerCreature.getBaseHp());
+            System.out.println(playerCreature.getName() + " HP: " + player.getCurrentHp()+ "/" + player.getMaxHp());
+            System.out.println(computerCreature.getName() + " HP: " + computer.getCurrentHp() + "/" + computer.getMaxHp());
 
             System.out.println("----------------------------");
 
