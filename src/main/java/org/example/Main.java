@@ -337,9 +337,9 @@ public class Main {
         // BATTLE STATS
         // --------------------------------
 
-        BattleCreature player = new BattleCreature(playerCreature);
+        BattleCreature player = new BattleCreature(playerCreature, selectedPlayerCreature.getLevel());
 
-        BattleCreature computer = new BattleCreature(computerCreature);
+        BattleCreature computer = new BattleCreature(computerCreature, 1);
 
 
         // --------------------------------
@@ -594,6 +594,19 @@ public class Main {
 
             selectedPlayerCreature.addWin();
             selectedPlayerCreature.addExperience(xpEarned);
+
+            int levelsGained =
+                    selectedPlayerCreature.checkForLevelUps();
+
+            if (levelsGained > 0) {
+
+                System.out.println(
+                        playerCreature.getName() +
+                                " reached Level " +
+                                selectedPlayerCreature.getLevel() +
+                                "!"
+                );
+            }
 
             playerCreatureRepository.updateProgress(
                     selectedPlayerCreature

@@ -11,12 +11,14 @@ public class BattleCreature {
     private boolean poisoned;
     private int poisonDamage;
 
-    public BattleCreature(Creature creature) {
+    public BattleCreature(Creature creature, int level) {
         this.creature = creature;
 
-        this.currentHp = creature.getBaseHp();
-        this.currentAttack = creature.getAttack();
-        this.currentDefense = creature.getDefense();
+        int levelBonus = level - 1;
+
+        this.currentHp = creature.getBaseHp() + (levelBonus * 5);
+        this.currentAttack = creature.getAttack() + (levelBonus * 2);
+        this.currentDefense = creature.getDefense() + (levelBonus * 2);
 
         this.poisoned = false;
         this.poisonDamage = 0;

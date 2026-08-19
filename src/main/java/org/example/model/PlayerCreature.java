@@ -93,4 +93,34 @@ public class PlayerCreature {
                 + " | W: " + wins
                 + " | L: " + losses;
     }
+
+    public boolean checkForLevelUp() {
+
+        int requiredXp = level * 100;
+
+        if (experience >= requiredXp) {
+
+            experience -= requiredXp;
+            level++;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public int checkForLevelUps() {
+
+        int levelsGained = 0;
+
+        while (experience >= level * 100) {
+
+            experience -= level * 100;
+            level++;
+
+            levelsGained++;
+        }
+
+        return levelsGained;
+    }
 }
